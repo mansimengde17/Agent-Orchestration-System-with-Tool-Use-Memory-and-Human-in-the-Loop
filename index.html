@@ -185,22 +185,22 @@ canvas.sim { flex:1; min-height:0; width:100%; border-radius:10px;
       </div>
       <div class="tab-pane" id="tab-workflow">
         <div class="flow" id="flow">
-<div class="fstep"><div class="fi">01</div>
-<div class="fstep"><div class="fi">02</div>
-<div class="fstep"><div class="fi">03</div>
-<div class="fstep"><div class="fi">04</div>
-<div class="fstep"><div class="fi">05</div>
-<div class="fstep"><div class="fi">06</div>
+<div class="fstep"><div class="fi">01</div><b>Task arrives</b><p>User task enters the orchestrator with session context and any prior conversation memory.</p></div>
+<div class="fstep"><div class="fi">02</div><b>Memory recall</b><p>Supervisor queries long term memory for similar past tasks and retrieves relevant approaches.</p></div>
+<div class="fstep"><div class="fi">03</div><b>Decompose</b><p>Supervisor produces an ordered subtask list: research, analysis, writing, then the sensitive send step.</p></div>
+<div class="fstep"><div class="fi">04</div><b>Run specialists</b><p>Each specialist agent calls real tools in sequence: web search, database query, file write.</p></div>
+<div class="fstep"><div class="fi">05</div><b>Review gate</b><p>Reviewer scores every specialist output before the next agent sees it; low scores trigger a retry.</p></div>
+<div class="fstep"><div class="fi">06</div><b>Human approve</b><p>Sensitive final step is escalated to the human operator for approval or redirection.</p></div>
         </div>
       </div>
       <div class="tab-pane" id="tab-depth">
         <div class="arch">
-<div class="step"><div class="n">1</div>
-<div class="step"><div class="n">2</div>
-<div class="step"><div class="n">3</div>
-<div class="step"><div class="n">4</div>
-<div class="step"><div class="n">5</div>
-<div class="step"><div class="n">6</div>
+<div class="step"><div class="n">1</div><div><b>Task gateway</b><p>Routes incoming tasks, authenticates the session, and tracks conversation state.</p></div></div>
+<div class="step"><div class="n">2</div><div><b>Supervisor planner</b><p>Decomposes the task into subtasks using long term memory as planning context.</p></div></div>
+<div class="step"><div class="n">3</div><div><b>Specialist agent pool</b><p>Research, analysis, and writing agents each hold a scoped set of real tools.</p></div></div>
+<div class="step"><div class="n">4</div><div><b>Reviewer scorer</b><p>Validates each specialist output against the task spec before the pipeline advances.</p></div></div>
+<div class="step"><div class="n">5</div><div><b>Human escalation channel</b><p>Async approval queue; the operator can approve, modify, or take over entirely.</p></div></div>
+<div class="step"><div class="n">6</div><div><b>Long term memory store</b><p>Writes the successful approach and key lessons after each completed task.</p></div></div>
         </div>
       </div>
       <div class="tab-pane" id="tab-code">
@@ -252,11 +252,7 @@ curl -s -X POST localhost:8000/v1/tasks \
       i = (i + 1) % (steps.length + 3);
       setTimeout(tick, i === 0 ? 900 : 520);
     }
-    var seen = false;
-    window.addEventListener('scroll', function () {
-      var r = flow.getBoundingClientRect();
-      if (!seen && r.top < window.innerHeight * 0.8) { seen = true; tick(); }
-    });
+    setTimeout(tick, 800);
   }
 })();
 </script>
@@ -283,7 +279,7 @@ curl -s -X POST localhost:8000/v1/tasks \
       s.appendChild(el('div', 'l', d[0])); row.appendChild(s);
       out[d[0]] = v; });
     stage.appendChild(row); return out; }
-  function mkcanvas(h) { var c = el('canvas', 'sim'); c.height = h || 340;
+  function mkcanvas() { var c = el('canvas', 'sim');
     stage.appendChild(c); return c; }
   // Draw a small human figure at (x,y). scale ~ body height.
   function human(ctx, x, y, s, color, wave) {
@@ -321,7 +317,7 @@ curl -s -X POST localhost:8000/v1/tasks \
   // Agent orchestration: the supervisor decomposes a task, specialist
   // agents run tools, the reviewer validates, and a human operator
   // approves the sensitive final step (human in the loop).
-  var cv = mkcanvas(380); var ctx = cv.getContext('2d');
+  var cv = mkcanvas(); var ctx = cv.getContext('2d');
   var S = stats([['stage', 'idle'], ['subtasks done', '0'],
                  ['escalations', '0'], ['status', 'ready']]);
   var box = el('div', 'log'); stage.appendChild(box);
@@ -346,10 +342,12 @@ curl -s -X POST localhost:8000/v1/tasks \
     ctx.restore();
   }
   function draw() {
-    var w = cv.clientWidth; cv.width=w*(window.devicePixelRatio>1?2:1);
-    ctx.setTransform(window.devicePixelRatio>1?2:1,0,0,
-      window.devicePixelRatio>1?2:1,0,0);
-    ctx.clearRect(0,0,w,H);
+    var w = cv.clientWidth, H = cv.clientHeight || 380;
+    if (w < 10) return;
+    var dpr = window.devicePixelRatio > 1 ? 2 : 1;
+    cv.width = w * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, H);
     // supervisor
     var supx=w*0.5, supy=48;
     ctx.fillStyle=hexToRgba(ACCENT,.16); ctx.strokeStyle=ACCENT; ctx.lineWidth=2;
@@ -440,7 +438,7 @@ curl -s -X POST localhost:8000/v1/tasks \
   btn('Run the task', function(){ run(); });
   var approveBtn = btn('Operator: approve', function(){ approve(); });
   approveBtn.style.display='none';
-  draw();
+  requestAnimationFrame(draw);
 
 })();
 </script>
