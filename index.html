@@ -202,7 +202,7 @@ footer a { color: var(--accent); text-decoration: none; }
     <div class="step"><div class="n">3</div><div><b>Two tier memory</b><p>Working memory is a shared scratch space scoped to one task and cleared when it ends. Long term semantic memory stores approaches and preferences with importance scoring, consolidation of duplicates, decay over time, and a delete endpoint for user data requests.</p></div></div>
     <div class="step"><div class="n">4</div><div><b>Human in the loop escalation</b><p>A trigger table escalates on low plan confidence, a specialist failing twice, a sensitive action, or a weak reviewer score. Four levels range from notify, to approve the action, to approve the plan, to take over entirely.</p></div></div>
     <div class="step"><div class="n">5</div><div><b>State machine with conditional edges</b><p>Failures retry once then escalate, rejected output returns to the specialist with feedback, sensitive steps pause for approval, and low confidence plans wait for sign off before any work begins.</p></div></div>
-    <div class="step"><div class="n">6</div><div><b>Full execution trace</b><p>Every planning decision, tool call, review, and escalation lands in a trace tree with tokens, cost, latency, and status per node, plus a replay harness that re-runs a task with any input patched to diagnose failures.</p></div></div>
+    <div class="step"><div class="n">6</div><div><b>Full execution trace</b><p>Every planning decision, tool call, review, and escalation lands in a trace tree with tokens, cost, latency, and status per node, plus a replay harness that reruns a task with any input patched to diagnose failures.</p></div></div>
   </div>
 </section>
 
